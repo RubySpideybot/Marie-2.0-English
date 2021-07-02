@@ -34,7 +34,7 @@ def check_flood(bot: Bot, update: Update) -> str:
         return ""
 
     try:
-        chat.kick_member(user.id)
+        bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
         msg.reply_text("dont disturb others you are No need for this group anymore...")
 
         return "<b>{}:</b>" \
