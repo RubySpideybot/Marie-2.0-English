@@ -104,7 +104,7 @@ def flood(bot: Bot, update: Update):
         update.effective_message.reply_text("I am not doing message control right now!")
     else:
         update.effective_message.reply_text(
-            " {} is the linit, I'll mute the person who sends the message more at the same time.".format(limit))
+            " {} is the litnit, I'll mute the person who sends the messages more at the same time.".format(limit))
 
 
 def __migrate__(old_chat_id, new_chat_id):
