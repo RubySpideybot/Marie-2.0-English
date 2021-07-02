@@ -90,7 +90,7 @@ def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
                                                                     mention_html(user.id, user.first_name), amount)
 
         else:
-            message.reply_text("I don't understand what you're saying .... Either use the number or use Yes-No")
+            message.reply_text("I don't understand what you're saying .... Either use the number or use no/off")
 
     return ""
 
@@ -104,7 +104,7 @@ def flood(bot: Bot, update: Update):
         update.effective_message.reply_text("I am not doing message control right now!")
     else:
         update.effective_message.reply_text(
-            " {} I'll leave the bun to the person who sends the message more at the same time.".format(limit))
+            " {} is the linit, I'll mute the person who sends the message more at the same time.".format(limit))
 
 
 def __migrate__(old_chat_id, new_chat_id):
