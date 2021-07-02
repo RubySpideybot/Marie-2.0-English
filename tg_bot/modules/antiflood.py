@@ -35,7 +35,7 @@ def check_flood(bot: Bot, update: Update) -> str:
 
     try:
         bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
-        msg.reply_text("You are muted, due to more consecutive messages...")
+        msg.reply_text("{} is muted, due to more consecutive messages...".format(mention_html(user.id, user.first_name)))
 
         return "<b>{}:</b>" \
                "\n#MUTED" \
