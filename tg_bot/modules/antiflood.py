@@ -1,7 +1,7 @@
 import html
-from typing import List
+from typing import Optional, List
 
-from telegram import Update, Bot
+from telegram import Message, Chat, Update, Bot, User
 from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, CommandHandler, run_async
 from telegram.utils.helpers import mention_html
@@ -17,9 +17,9 @@ FLOOD_GROUP = 3
 @run_async
 @loggable
 def check_flood(bot: Bot, update: Update) -> str:
-    user = update.effective_user
-    chat = update.effective_chat
-    msg = update.effective_message
+    user = update.effective_user  # type: Optional[User]
+    chat = update.effective_chat  # type: Optional[Chat]
+    msg = update.effective_message  # type: Optional[Message]
 
     if not user:  # ignore channels
         return ""
@@ -34,16 +34,21 @@ def check_flood(bot: Bot, update: Update) -> str:
         return ""
 
     try:
-        bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
-        msg.reply_text(tld(chat.id, "flood_mute"))
+        chat.kick_member(user.id)
+        msg.reply_text("dont disturb others you are No need for this group anymore...")
 
-        return tld(chat.id, "flood_logger_success").format(
-            html.escape(chat.title), mention_html(user.id, user.first_name))
+        return "<b>{}:</b>" \
+               "\n#BANNED" \
+               "\n<b>User:</b> {}" \
+               "\nFlooded the group.".format(html.escape(chat.title),
+                                             mention_html(user.id, user.first_name))
 
     except BadRequest:
-        msg.reply_text(tld(chat.id, "flood_err_no_perm"))
+        msg.reply_text("You cannot use this service as long as you do not give me Permissions.")
         sql.set_flood(chat.id, 0)
-        return tld(chat.id, "flood_logger_fail").format(chat.title)
+        return "<b>{}:</b>" \
+               "\n#INFO" \
+               "\nDon't have kick permissions, so automatically disabled antiflood.".format(chat.title)
 
 
 @run_async
@@ -51,68 +56,80 @@ def check_flood(bot: Bot, update: Update) -> str:
 @can_restrict
 @loggable
 def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
-    chat = update.effective_chat
-    user = update.effective_user
-    message = update.effective_message
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    message = update.effective_message  # type: Optional[Message]
 
     if len(args) >= 1:
         val = args[0].lower()
         if val == "off" or val == "no" or val == "0":
             sql.set_flood(chat.id, 0)
-            message.reply_text(tld(chat.id, "flood_set_off"))
+            message.reply_text("I will no longer dismiss those who flood.")
 
         elif val.isdigit():
             amount = int(val)
             if amount <= 0:
                 sql.set_flood(chat.id, 0)
-                message.reply_text(tld(chat.id, "flood_set_off"))
-                return tld(chat.id, "flood_logger_set_off").format(
-                    html.escape(chat.title),
-                    mention_html(user.id, user.first_name))
+                message.reply_text("I will no longer dismiss those who flood.")
+                return "<b>{}:</b>" \
+                       "\n#SETFLOOD" \
+                       "\n<b>Admin:</b> {}" \
+                       "\nDisabled antiflood.".format(html.escape(chat.title), mention_html(user.id, user.first_name))
 
             elif amount < 3:
-                message.reply_text(tld(chat.id, "flood_err_num"))
+                message.reply_text("Antiflood has to be either 0 (disabled), or a number bigger than 3!")
                 return ""
 
             else:
                 sql.set_flood(chat.id, amount)
-                message.reply_text(tld(chat.id, "flood_set").format(amount))
-                return tld(chat.id, "flood_logger_set_on").format(
-                    html.escape(chat.title),
-                    mention_html(user.id, user.first_name), amount)
+                message.reply_text("Message control {} has been added to count ".format(amount))
+                return "<b>{}:</b>" \
+                       "\n#SETFLOOD" \
+                       "\n<b>Admin:</b> {}" \
+                       "\nSet antiflood to <code>{}</code>.".format(html.escape(chat.title),
+                                                                    mention_html(user.id, user.first_name), amount)
 
         else:
-            message.reply_text(tld(chat.id, "flood_err_args"))
+            message.reply_text("I don't understand what you're saying .... Either use the number or use Yes-No")
 
     return ""
 
 
 @run_async
 def flood(bot: Bot, update: Update):
-    chat = update.effective_chat
+    chat = update.effective_chat  # type: Optional[Chat]
 
     limit = sql.get_flood_limit(chat.id)
     if limit == 0:
-        update.effective_message.reply_text(tld(chat.id, "flood_status_off"))
+        update.effective_message.reply_text("I am not doing message control right now!")
     else:
         update.effective_message.reply_text(
-            tld(chat.id, "flood_status_on").format(limit))
+            " {} I'll leave the bun to the person who sends the message more at the same time.".format(limit))
 
 
 def __migrate__(old_chat_id, new_chat_id):
     sql.migrate_chat(old_chat_id, new_chat_id)
 
 
-__help__ = True
+def __chat_settings__(chat_id, user_id):
+    limit = sql.get_flood_limit(chat_id)
+    if limit == 0:
+        return "*Not* currently enforcing flood control."
+    else:
+        return " The message control is set to `{}`.".format(limit)
 
-# TODO: Add actions: ban/kick/mute/tban/tmute
 
-FLOOD_BAN_HANDLER = MessageHandler(
-    Filters.all & ~Filters.status_update & Filters.group, check_flood)
-SET_FLOOD_HANDLER = CommandHandler("setflood",
-                                   set_flood,
-                                   pass_args=True,
-                                   filters=Filters.group)
+__help__ = """
+ - /flood: To know your current message control..
+
+*Admin only:*
+ - /setflood <int/'no'/'off'>: enables or disables flood control
+"""
+
+__mod_name__ = "AntiFlood"
+
+FLOOD_BAN_HANDLER = MessageHandler(Filters.all & ~Filters.status_update & Filters.group, check_flood)
+SET_FLOOD_HANDLER = CommandHandler("setflood", set_flood, pass_args=True, filters=Filters.group)
 FLOOD_HANDLER = CommandHandler("flood", flood, filters=Filters.group)
 
 dispatcher.add_handler(FLOOD_BAN_HANDLER, FLOOD_GROUP)
