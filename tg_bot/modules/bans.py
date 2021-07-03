@@ -90,7 +90,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
 
     try:
         chat.kick_member(user_id)
-        bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
+       
         message.reply_text("I snap bad people like you to save the universe!")
         return log
 
