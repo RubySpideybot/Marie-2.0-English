@@ -24,7 +24,6 @@ Iam a group manager bot maintained by [my master](tg://user?id={}).
 
 You can find the list of available commands with /help.
 
-Want to add me in your group? [Click here!](t.me/Rubytony_bot?startgroup=add)
 
 **Miss You Tony Stark ❤️**
 
