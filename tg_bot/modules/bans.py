@@ -91,7 +91,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
         chat.kick_member(user_id)
         
         keyboard = []
-        reply = "{} is Banned by {} in {}".format(mention_html(member.user.id, member.user.first_name), mention_html(user.id, user.first_name), html.escape(chat.title))
+        reply = "{} is Banned by {} in {}\n\nReason : {}".format(mention_html(member.user.id, member.user.first_name), mention_html(user.id, user.first_name), html.escape(chat.title), reason)
         message.reply_text(reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         return log
 
