@@ -223,7 +223,7 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
     res = chat.unban_member(user_id)  # unban on current user = kick
     if res:
         
-        message.reply_text("{} is Kicked!".format(mention_html(member.user.id, member.user.first_name))
+        message.reply_text("{} is Kicked!".format(member.user.first_name))
         log = "<b>{}:</b>" \
               "\n#KICKED" \
               "\n<b>Admin:</b> {}" \
