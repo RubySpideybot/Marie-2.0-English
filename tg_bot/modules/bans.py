@@ -104,7 +104,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
             LOGGER.warning(update)
             LOGGER.exception("ERROR banning user %s in chat %s (%s) due to %s", user_id, chat.title, chat.id,
                              excp.message)
-            message.reply_text("{} is banned by {} in {}.\n\nReason : {}".format(member.user.first_name,user.first_name,html.escape(chat.title),reason))
+            message.reply_text("Well damn, I can't ban that user.")
 
     return ""
 
@@ -290,7 +290,7 @@ def unban(bot: Bot, update: Update, args: List[str]) -> str:
         return ""
 
     chat.unban_member(user_id)
-    message.reply_text("Yep, {} can join!".format(member.user.first_name))
+    message.reply_text("Yep, this user can join!")
 
     log = "<b>{}:</b>" \
           "\n#UNBANNED" \
