@@ -62,6 +62,9 @@ def report(bot: Bot, update: Update) -> str:
         admin_list = chat.get_administrators()
 
         if chat.username and chat.type == Chat.SUPERGROUP:
+
+reported = f"{mention_html(user.id, user.first_name)} reported {mention_html(reported_user.id, reported_user.first_name)} to the admins!"
+
             msg = "<b>{}:</b>" \
                   "\n<b>Reported user:</b> {} (<code>{}</code>)" \
                   "\n<b>Reported by:</b> {} (<code>{}</code>)".format(html.escape(chat.title),
