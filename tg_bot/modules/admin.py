@@ -15,7 +15,6 @@ from tg_bot.modules.log_channel import loggable
 
 
 @run_async
-@connection_status
 @bot_admin
 @can_promote
 @user_admin
@@ -78,7 +77,6 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-@connection_status
 @bot_admin
 @can_promote
 @user_admin
@@ -139,7 +137,6 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
 
 # Until the library releases the method
 @run_async
-@connection_status
 @bot_admin
 @can_promote
 @user_admin
@@ -266,7 +263,6 @@ def invite(bot: Bot, update: Update):
 
 
 @run_async
-@connection_status
 def adminlist(bot: Bot, update: Update):
     chat = update.effective_chat
     user = update.effective_user
