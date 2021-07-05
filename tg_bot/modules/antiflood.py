@@ -26,7 +26,7 @@ def check_flood(bot: Bot, update: Update) -> str:
         return log_message
 
     # ignore admins and whitelists
-    if (is_user_admin(chat, user.id)   
+    if is_user_admin(chat, user.id)   
         sql.update_flood(chat.id, None)
         return log_message
 
