@@ -198,6 +198,9 @@ REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
 SETTING_HANDLER = CommandHandler("reports", report_setting, pass_args=True)
 ADMIN_REPORT_HANDLER = RegexHandler("(?i)@admin(s)?", report)
 
+report_button_user_handler = CallbackQueryHandler(buttons, pattern=r"report_")
+dispatcher.add_handler(report_button_user_handler)
+
 dispatcher.add_handler(REPORT_HANDLER, REPORT_GROUP)
 dispatcher.add_handler(ADMIN_REPORT_HANDLER, REPORT_GROUP)
 dispatcher.add_handler(SETTING_HANDLER)
