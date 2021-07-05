@@ -75,7 +75,34 @@ def report(bot: Bot, update: Update) -> str:
             link = "\n<b>Link:</b> " \
                    "<a href=\"http://telegram.me/{}/{}\">click here</a>".format(chat.username, message.message_id)
 
-            should_forward = False
+            should_forward = True
+            keyboard = [[
+                InlineKeyboardButton(
+                    u"➡ Message",
+                    url="https://t.me/{}/{}".format(
+                        chat.username,
+                        str(message.reply_to_message.message_id)))
+            ],
+                        [
+                            InlineKeyboardButton(
+                                u"⚠ Kick",
+                                callback_data="report_{}=kick={}={}".format(
+                                    chat.id, reported_user.id,
+                                    reported_user.first_name)),
+                            InlineKeyboardButton(
+                                u"⛔️ Ban",
+                                callback_data="report_{}=banned={}={}".format(
+                                    chat.id, reported_user.id,
+                                    reported_user.first_name))
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                u"❎ Delete Message",
+                                callback_data="report_{}=delete={}={}".format(
+                                    chat.id, reported_user.id,
+                                    message.reply_to_message.message_id))
+                        ]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
 
         else:
             msg = "{} is calling for admins in \"{}\"!".format(mention_html(user.id, user.first_name),
@@ -109,6 +136,40 @@ def report(bot: Bot, update: Update) -> str:
 def __migrate__(old_chat_id, new_chat_id):
     sql.migrate_chat(old_chat_id, new_chat_id)
 
+def buttons(bot: Bot, update):
+    query = update.callback_query
+    splitter = query.data.replace("report_", "").split("=")
+    if splitter[1] == "kick":
+        try:
+            bot.kickChatMember(splitter[0], splitter[2])
+            bot.unbanChatMember(splitter[0], splitter[2])
+            query.answer("✅ Succesfully kicked")
+            return ""
+        except Exception as err:
+            query.answer("❎ Failed to kick")
+            bot.sendMessage(text="Error: {}".format(err),
+                            chat_id=query.message.chat_id,
+                            parse_mode=ParseMode.HTML)
+    elif splitter[1] == "banned":
+        try:
+            bot.kickChatMember(splitter[0], splitter[2])
+            query.answer("✅  Succesfully Banned")
+            return ""
+        except Exception as err:
+            bot.sendMessage(text="Error: {}".format(err),
+                            chat_id=query.message.chat_id,
+                            parse_mode=ParseMode.HTML)
+            query.answer("❎ Failed to ban")
+    elif splitter[1] == "delete":
+        try:
+            bot.deleteMessage(splitter[0], splitter[3])
+            query.answer("✅ Message Deleted")
+            return ""
+        except Exception as err:
+            bot.sendMessage(text="Error: {}".format(err),
+                            chat_id=query.message.chat_id,
+                            parse_mode=ParseMode.HTML)
+            query.answer("❎ Failed to delete message!")
 
 def __chat_settings__(chat_id, user_id):
     return "This chat is setup to send user reports to admins, via /report and @admin: `{}`".format(
