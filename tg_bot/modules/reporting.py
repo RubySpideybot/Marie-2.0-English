@@ -215,6 +215,8 @@ def buttons(bot: Bot, update):
             query.answer("❎ Failed to delete message!")
 
 
+__mod_name__ = "Reporting"
+
 __help__ = True
 
 REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
